@@ -28,19 +28,19 @@ jobs:
         run: docker rm -f server-container  
       - name: Run Docker Container
         run: docker run -d -p 8000:8000 --name server-container \
-          -e MONGO_DB_URI=${{ secrets.MONGO_DB_URI }} \
-          -e NODEMAILER_SERVICE=${{ secrets.NODEMAILER_SERVICE }} \
-          -e NODEMAILER_HOST=${{ secrets.NODEMAILER_HOST }} \
-          -e NODEMAILER_PORT=${{ secrets.NODEMAILER_PORT }} \
-          -e NODEMAILER_USER=${{ secrets.NODEMAILER_USER }} \
-          -e NODEMAILER_PASS=${{ secrets.NODEMAILER_PASS }} \
-          -e SESSION_NAME=${{ secrets.SESSION_NAME }} \
-          -e DEVICE_NAME=${{ secrets.DEVICE_NAME }} \
-          -e SESSION_SECRET_KEY=${{ secrets.SESSION_SECRET_KEY }} \
-          -e GOOGLE_AUTH_CLIENT_ID=${{ secrets.GOOGLE_AUTH_CLIENT_ID }} \
-          -e GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
-          -e GOOGLE_OAUTH_REDIRECT=${{ secrets.GOOGLE_OAUTH_REDIRECT }} \
-          -e CLIENT_URI=${{ secrets.CLIENT_URI }} \
-          -e PORT=${{ secrets.PORT }} \
-          -e SALT_ROUNDS=${{ secrets.SALT_ROUNDS }} \
+          -e MONGO_DB_URI='${{ secrets.MONGO_DB_URI }}' \
+          -e NODEMAILER_SERVICE='${{ secrets.NODEMAILER_SERVICE }}' \
+          -e NODEMAILER_HOST='${{ secrets.NODEMAILER_HOST }}' \
+          -e NODEMAILER_PORT='${{ secrets.NODEMAILER_PORT }}' \
+          -e NODEMAILER_USER='${{ secrets.NODEMAILER_USER }}' \
+          -e NODEMAILER_PASS='${{ secrets.NODEMAILER_PASS }}' \
+          -e SESSION_NAME='${{ secrets.SESSION_NAME }}' \
+          -e DEVICE_NAME='${{ secrets.DEVICE_NAME }}' \
+          -e SESSION_SECRET_KEY='${{ secrets.SESSION_SECRET_KEY }}' \
+          -e GOOGLE_AUTH_CLIENT_ID='${{ secrets.GOOGLE_AUTH_CLIENT_ID }}' \
+          -e GOOGLE_CLIENT_SECRET='${{ secrets.GOOGLE_CLIENT_SECRET }}' \
+          -e GOOGLE_OAUTH_REDIRECT='${{ secrets.GOOGLE_OAUTH_REDIRECT }}' \
+          -e CLIENT_URI='${{ secrets.CLIENT_URI }}' \
+          -e PORT='${{ secrets.PORT }}' \
+          -e SALT_ROUNDS='${{ secrets.SALT_ROUNDS }}' \
           debashish22/authentique:latest
