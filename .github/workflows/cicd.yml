@@ -29,4 +29,4 @@ jobs:
       - name: Run Docker Container
         run: docker run -d -p 8000:8000 --name server-container \
           -e MONGO_DB_URI=${{ secrets.MONGO_DB_URI }} \
-          debashish22/authentique
+          debashish22/authentique:latest
