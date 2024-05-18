@@ -28,6 +28,6 @@ jobs:
         run: docker rm -f server-container  
       - name: Run Docker Container
         run: |
-        docker run -d -p 8000:8000 --name server-container \
-        $(for key in $(compgen -e); do echo "-e $key='${{ secrets[$key] }}'"; done) \
-        debashish22/authentique:latest
+          docker run -d -p 8000:8000 --name server-container \
+          $(for key in $(compgen -e); do echo "-e $key='${{ secrets[$key] }}'"; done) \
+          debashish22/authentique:latest
