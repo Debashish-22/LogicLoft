@@ -27,4 +27,4 @@ jobs:
       - name: Delete old container
         run: docker rm -f server-container  
       - name: Run Docker Container
-        run: docker run -d -p 8000:8000 --name -e MONGO_DB_URI='${{ secrets.MONGO_DB_URI }}' server-container debashish22/authentique
+        run: docker run -d -p 8000:8000 --name -e MONGO_DB_URI='${{ secrets.MONGO_DB_URI }}' server-container debashish22/authentique:latest
