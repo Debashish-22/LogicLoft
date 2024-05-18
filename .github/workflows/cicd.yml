@@ -30,6 +30,6 @@ jobs:
         run: |
           ENV_VARS=""
           for key in $(compgen -e); do
-            ENV_VARS="$ENV_VARS -e $key='${{ secrets[$key] }}'"
+            ENV_VARS="$ENV_VARS -e $key=${{ secrets.[\"$key\"] }}"
           done
           docker run -d -p 8000:8000 --name server-container $ENV_VARS debashish22/authentique:latest
