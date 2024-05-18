@@ -43,4 +43,4 @@ jobs:
           -e CLIENT_URI='${{ secrets.CLIENT_URI }}' \
           -e PORT='${{ secrets.PORT }}' \
           -e SALT_ROUNDS='${{ secrets.SALT_ROUNDS }}' \
-          debashish22/authentique:latest
+          debashish22/authentique
