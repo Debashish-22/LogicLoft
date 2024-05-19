@@ -15,4 +15,12 @@ router.post("/revoke-device", isAuthentic, profileControlller.revokeDevice);
 
 router.delete("/delete-account", isAuthentic, profileControlller.deleteAccount);
 
+router.use("*", (req, res) => {
+
+    return res.status(404).json({
+        success: false,
+        message: "Sorry, the requested route doesn't exist."
+    });
+});
+
 module.exports = router;

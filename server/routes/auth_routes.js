@@ -18,12 +18,16 @@ router.post("/google-one-tap", isGuest, authController.googleOneTap);
 
 router.post("/logout", isAuthentic, authController.logout);
 
-// router.get("/sessions", isAuthentic, authController.sessions);
-
-// router.post("/revoke-session", isAuthentic, authController.revokeSession);
-
 router.get("/auth-user", isAuthentic, authController.authUser);
 
 router.post("/reset-password", authController.resetPassword);
+
+router.use("*", (req, res) => {
+
+    return res.status(404).json({
+        success: false,
+        message: "Sorry, the requested route doesn't exist."
+    });
+});
 
 module.exports = router;

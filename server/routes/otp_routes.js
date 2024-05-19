@@ -15,4 +15,12 @@ router.post("/send-otp", otpVerificationLimiter, otpController.sendOtp);
 
 router.post("/verify-otp", otpVerificationLimiter, otpController.verifyOtp);
 
+router.use("*", (req, res) => {
+
+    return res.status(404).json({
+        success: false,
+        message: "Sorry, the requested route doesn't exist."
+    });
+});
+
 module.exports = router;
