@@ -71,7 +71,7 @@ const localSignup = async(req, res) => {
 
         const { username, email, password } = req.body;
     
-        if(!username || username.trim().length < usernameMinLen || !email || !emailRegex.test(email) || !password || password.trim().value.length < pwdMinLen){
+        if(!username || username.trim().length < usernameMinLen || !email || !emailRegex.test(email) || !password || password.trim().length < pwdMinLen){
             return res.status(400).json({ success: false, message: 'INVALID_BODY' });
         }
     
@@ -148,7 +148,7 @@ const login = async(req, res) => {
 
         const { email, password, platform } = req.body;
 
-        if(!email || !emailRegex.test(email) || !password || password.trim().value.length < pwdMinLen){
+        if(!email || !emailRegex.test(email) || !password || password.trim().length < pwdMinLen){
             return res.status(400).json({ success: false, message: 'INVALID_BODY' });
         }
 
