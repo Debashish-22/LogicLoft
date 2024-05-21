@@ -180,10 +180,12 @@ const login = async(req, res) => {
         
         res.cookie(process.env.SESSION_NAME, sessionId, {
             httpOnly: true,
+            sameSite: 'None',
             maxAge: (24 * 60 * 60 * 1000)
         });
 
         res.cookie(process.env.DEVICE_NAME, deviceId, {
+            sameSite: 'None',
             maxAge: (24 * 60 * 60 * 1000)
         });
 
@@ -256,10 +258,12 @@ const googleLogin = async(req, res) => {
 
         res.cookie(process.env.SESSION_NAME, sessionId, {
             httpOnly: true,
+            sameSite: 'None',
             maxAge: (24 * 60 * 60 * 1000)
         });
 
         res.cookie(process.env.DEVICE_NAME, deviceId, {
+            sameSite: 'None',
             maxAge: (24 * 60 * 60 * 1000)
         });
 
@@ -322,10 +326,12 @@ const googleOneTap = async(req, res) => {
 
         res.cookie(process.env.SESSION_NAME, sessionId, {
             httpOnly: true,
+            sameSite: 'None',
             maxAge: (24 * 60 * 60 * 1000)
         });
 
         res.cookie(process.env.DEVICE_NAME, deviceId, {
+            sameSite: 'None',
             maxAge: (24 * 60 * 60 * 1000)
         });
 
