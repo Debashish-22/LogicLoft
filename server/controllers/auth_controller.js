@@ -270,7 +270,6 @@ const googleLogin = async(req, res) => {
         return res.redirect(reqOrigin);
         
     } catch (error) {
-        console.log(error)
         return res.redirect(process.env.CLIENT_URI);
     }
 }
