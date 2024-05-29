@@ -4,6 +4,8 @@ const Session = require("../models/session_model");
 
 const { usernameMinLen } = require("../config/validation");
 
+const { otpVerify } = require("./otp_controller");
+
 const updateAvatar = async(req, res) => {
     try {
 
@@ -117,7 +119,15 @@ const deleteAccount = async(req, res) => {
 
         const { userId } = req;
 
-        if(!userId) return res.status(400).json({ success: false, message: "INVALID_BODY" });
+        const { otpCode } = req.body;
+
+        if(!userId || !otpCode) return res.status(400).json({ success: false, message: "INVALID_BODY" });
+
+        const { email } = await User.findById(userId);
+
+        const emailVerified = await otpVerify(email, otpCode);
+
+        if(!emailVerified) return res.status(409).json({ success: false, message: 'VERIFICATION_FAILED' });
 
         const deleteSessions = await Session.deleteMany({ userId });
 
@@ -130,6 +140,7 @@ const deleteAccount = async(req, res) => {
         res.status(200).json({ success: true, message: "ACCOUNT_DELETED" });
 
     } catch (error) {
+
         return res.status(500).json({ success: false, message: "INTERNAL_SERVER_ERROR" });
     }
 }

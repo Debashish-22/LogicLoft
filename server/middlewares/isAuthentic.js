@@ -1,43 +1,52 @@
 const CryptoJS = require("crypto-js");
+const jwt = require('jsonwebtoken');
 
 const User = require("../models/user_model");
 const Session = require("../models/session_model");
 
-const cookieParser = require("../utils/cookie_parser");
-
 const isAuthentic = async(req, res, next) => {
+
     try {
 
-        const sid = cookieParser(req)[process.env.SESSION_NAME];
+        if(!req.headers.authorization || !req.headers.authorization.startsWith("Bearer")){
 
-        if(!sid) return res.status(200).json({ success: false, message: "TOKEN_MISSING" });
-
-        const decryptedSessionId = CryptoJS.AES.decrypt(sid, process.env.SESSION_SECRET_KEY).toString(CryptoJS.enc.Utf8);
-
-        const session = await Session.findById(decryptedSessionId);
-
-        if(!session || !session.userId){
-            res.clearCookie(process.env.SESSION_NAME);
-            res.clearCookie(process.env.DEVICE_NAME);
-            res.status(200).json({ success: false, message: "UNAUTHORIZED" });
-            return;
+            return res.status(200).json({ success: false, message: "TOKEN_MISSING" });
         }
 
-        const user = await User.findById(session.userId);
+        const token = req.headers.authorization.split(" ")[1];
 
-        if(!user || !user.activeStatus){
-            res.clearCookie(process.env.SESSION_NAME);
-            res.clearCookie(process.env.DEVICE_NAME);
-            res.status(200).json({ success: false, message: "UNAUTHORIZED" });
-            return;
-        }
+        if(!token) return res.status(200).json({ success: false, message: "TOKEN_MISSING" });
 
-        req.userId = user.id;
-        req.sessionId = decryptedSessionId;
+        jwt.verify(token, process.env.JWT_SECRET_KEY, async function(err, decoded){
 
-        next();
-        
+            if(err) return res.status(200).json({ success: false, message: "TOKEN_INVALID" });
+
+            const now = Math.floor(Date.now() / 1000);
+
+            if(decoded.exp < now) return res.status(2000).json({ success: false, message: 'TOKEN_EXPIRED' });
+            
+            const sid = decoded[process.env.SESSION_NAME];
+
+            if(!sid) return res.status(200).json({ success: false, message: "TOKEN_INVALID" });
+    
+            const decryptedSessionId = CryptoJS.AES.decrypt(sid, process.env.SESSION_SECRET_KEY).toString(CryptoJS.enc.Utf8);
+    
+            const session = await Session.findById(decryptedSessionId);
+    
+            if(!session || !session.userId) return res.status(200).json({ success: false, message: "UNAUTHORIZED" });
+    
+            const user = await User.findById(session.userId);
+    
+            if(!user || !user.activeStatus) return res.status(200).json({ success: false, message: "UNAUTHORIZED" });
+    
+            req.userId = user.id;
+            req.sessionId = decryptedSessionId;
+    
+            next();
+        });
+
     } catch (error) {
+        
         return res.status(500).json({ success: false, message: error.message });
     }
 }

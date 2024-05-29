@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const CryptoJS = require("crypto-js");
 const { v4: uuidv4 } = require('uuid');
+const jwt = require('jsonwebtoken');
 
 const User = require("../models/user_model");
 const Session = require("../models/session_model");
@@ -9,6 +10,8 @@ const genRandomString = require("../utils/gen_random_string");
 
 const { OAuth2Client } = require('google-auth-library');
 
+const { otpVerify } = require('./otp_controller'); 
+
 const oAuth2Client = new OAuth2Client(
     process.env.GOOGLE_AUTH_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET, 
@@ -16,6 +19,8 @@ const oAuth2Client = new OAuth2Client(
 );
 
 const { saltRounds, emailRegex, usernameMinLen, pwdMinLen } = require("../config/validation");
+
+const SESSION_TIME = 24 * 60 * 60 * 1000;
 
 const isUserExist = async(email) => {
 
@@ -69,17 +74,19 @@ const localSignup = async(req, res) => {
 
     try {
 
-        const { username, email, password } = req.body;
+        const { username, email, password, otpCode } = req.body;
     
-        if(!username || username.trim().length < usernameMinLen || !email || !emailRegex.test(email) || !password || password.trim().length < pwdMinLen){
+        if(!otpCode || !username || username.trim().length < usernameMinLen || !email || !emailRegex.test(email) || !password || password.trim().length < pwdMinLen){
             return res.status(400).json({ success: false, message: 'INVALID_BODY' });
         }
     
         const userExist = await isUserExist(email);
     
-        if(userExist){
-            return res.status(409).json({ success: false, message: 'USER_EXIST' });
-        }
+        if(userExist) return res.status(409).json({ success: false, message: 'USER_EXIST' });
+
+        const emailVerified = await otpVerify(email, otpCode);
+
+        if(!emailVerified) return res.status(409).json({ success: false, message: 'VERIFICATION_FAILED' });
     
         const user = await createUser({
             username,
@@ -95,6 +102,7 @@ const localSignup = async(req, res) => {
         return res.status(200).json({ success: true, message: 'USER_CREATED' });
         
     } catch (error) {
+
         return res.status(500).json({ success: false, message: error.message });
     }
 }
@@ -136,7 +144,9 @@ const initiateSession = async({ userId, screenLimit, platform }) => {
 
         const encryptedSessionId = CryptoJS.AES.encrypt(session.id, process.env.SESSION_SECRET_KEY).toString();
 
-        return { sessionId: encryptedSessionId, deviceId: session.deviceId};
+        const token = jwt.sign({ APSID: encryptedSessionId }, process.env.JWT_SECRET_KEY, { expiresIn: SESSION_TIME });
+
+        return { sessionId: encryptedSessionId, deviceId: session.deviceId, token };
         
     } catch (error) {
         return null;
@@ -154,44 +164,23 @@ const login = async(req, res) => {
 
         const user = await User.findOne({ email });
 
-        if(!user){
-            return res.status(409).json({ success: false, message: "INVALID_CREDENTIALS" });
-        }
-
-        if(!user.activeStatus){
-            return res.status(409).json({ success: false, message: "INACTIVE" });
-        }
-
+        if(!user) return res.status(409).json({ success: false, message: "INVALID_CREDENTIALS" });
+        
+        if(!user.activeStatus) return res.status(409).json({ success: false, message: "INACTIVE" });
+        
         const match = await bcrypt.compare(password, user.password);
 
-        if(!match){
-            return res.status(409).json({ success: false, message: "INVALID_CREDENTIALS" });
-        }
-
-        const { sessionId, deviceId } = await initiateSession({
+        if(!match) return res.status(409).json({ success: false, message: "INVALID_CREDENTIALS" });
+        
+        const { sessionId, deviceId, token } = await initiateSession({
             userId: user.id,
             screenLimit: user.screenLimit,
             platform
         });
 
-        if(!sessionId || !deviceId){
-            return res.status(500).json({ success: false, message: "SOMETHING_WENT_WRONG" });
-        }
-        
-        res.cookie(process.env.SESSION_NAME, sessionId, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'None',
-            maxAge: (24 * 60 * 60 * 1000)
-        });
+        if(!sessionId || !deviceId || !token) return res.status(500).json({ success: false, message: "SOMETHING_WENT_WRONG" });
 
-        res.cookie(process.env.DEVICE_NAME, deviceId, {
-            secure: true,
-            sameSite: 'None',
-            maxAge: (24 * 60 * 60 * 1000)
-        });
-
-        return res.status(200).json({ success: true, message: 'USER_LOGGED_IN' });
+        return res.status(200).json({ success: true, message: 'USER_LOGGED_IN', data: { token, deviceId }});
 
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
@@ -250,25 +239,25 @@ const googleLogin = async(req, res) => {
             screenLimit = user.screenLimit;
         }
 
-        const { sessionId, deviceId } = await initiateSession({
+        const { sessionId, deviceId, token } = await initiateSession({
             userId,
             screenLimit,
             platform
         });
 
-        if(!sessionId || !deviceId) return res.redirect(reqOrigin);
+        if(!sessionId || !deviceId || !token) return res.redirect(reqOrigin);
 
-        res.cookie(process.env.SESSION_NAME, sessionId, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'None',
-            maxAge: (24 * 60 * 60 * 1000)
+        res.cookie(process.env.AUTH_TOKEN, token, {
+            // httpOnly: true,
+            // secure: true,
+            // sameSite: 'None',
+            maxAge: SESSION_TIME
         });
 
-        res.cookie(process.env.DEVICE_NAME, deviceId, {
-            secure: true,
-            sameSite: 'None',
-            maxAge: (24 * 60 * 60 * 1000)
+        res.cookie(process.env.DEVICE_TOKEN, deviceId, {
+            // secure: true,
+            // sameSite: 'None',
+            maxAge: SESSION_TIME
         });
 
         return res.redirect(reqOrigin);
@@ -319,28 +308,15 @@ const googleOneTap = async(req, res) => {
             screenLimit = user.screenLimit;
         }
 
-        const { sessionId, deviceId } = await initiateSession({
+        const { sessionId, deviceId, token } = await initiateSession({
             userId,
             screenLimit,
             platform
         });
 
-        if(!sessionId || !deviceId) return res.status(500).json({ success: false, message: "SOMETHING_WENT_WRONG" });
+        if(!sessionId || !deviceId || !token) return res.status(500).json({ success: false, message: "SOMETHING_WENT_WRONG" });
 
-        res.cookie(process.env.SESSION_NAME, sessionId, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'None',
-            maxAge: (24 * 60 * 60 * 1000)
-        });
-
-        res.cookie(process.env.DEVICE_NAME, deviceId, {
-            secure: true,
-            sameSite: 'None',
-            maxAge: (24 * 60 * 60 * 1000)
-        });
-
-        res.status(200).json({ success: true, message: 'LOGGEED_IN' });
+        return res.status(200).json({ success: true, message: 'USER_LOGGED_IN', data: { token, deviceId }});
         
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
@@ -356,10 +332,6 @@ const logout = async(req, res) => {
         
         if(!deleteSession) return res.status(500).json({ success: false, message: "SOMETHING_WENT_WRONG" });
 
-        res.clearCookie(process.env.SESSION_NAME);
-
-        res.clearCookie(process.env.DEVICE_NAME);
-
         res.status(200).json({ success: true, message: 'LOGGED_OUT' });
 
     } catch (error) {
@@ -367,75 +339,16 @@ const logout = async(req, res) => {
     }
 }
 
-// const sessions = async(req, res) => {
-//     try {
-
-//         const { userId, sessionId } = req;
-
-//         const userSessions = await Session.find({ userId });
-
-//         if(!userSessions) return res.status(500).json({ success: false, message: "SOMETHING_WENT_WRONG" });
-
-//         let sessions = [];
-
-//         userSessions.map((data) => {
-
-//             const sid = data.id;
-
-//             const currentDevice = (sid === sessionId) ? true : false;
-            
-//             const { login, platform } = data;
-            
-//             const encrypted_sid = CryptoJS.AES.encrypt(sid, process.env.SESSION_SECRET_KEY).toString();
-
-//             sessions.push({
-//                 sessionId: encrypted_sid,
-//                 login,
-//                 platform,
-//                 currentDevice
-//             });
-//         });
-
-//         res.status(200).json({ success: true, message: 'FETCHED', sessions});
-
-//     } catch (error) {
-//         return res.status(500).json({ success: false, message: error.message });
-//     }
-// }
-
-// const revokeSession = async(req, res) => {
-//     try {
-
-//         const userSessionId = req.sessionId;
-
-//         const encryptedSessionId = req.body.sessionId;
-
-//         if(!userSessionId || !encryptedSessionId) return res.status(409).json({ success: false, message: "TOKEN_MISSING" });
-        
-//         const decryptedSessionId = CryptoJS.AES.decrypt(encryptedSessionId, process.env.SESSION_SECRET_KEY).toString(CryptoJS.enc.Utf8);
-
-//         const deleteSession = await Session.findByIdAndDelete(decryptedSessionId);
-
-//         if(!deleteSession) return res.status(500).json({success: false, message: "SOMETHING_WENT_WRONG"});
-
-//         if(userSessionId === decryptedSessionId){
-//             res.clearCookie(process.env.SESSION_NAME);
-//             res.clearCookie(process.env.DEVICE_NAME);
-//         }
-
-//         res.status(200).json({ success: true, message: 'SESSION_REVOKED'});
-        
-//     } catch (error) {
-//         return res.status(500).json({ success: false, message: error.message });
-//     }
-// }
-
 const resetPassword = async(req, res) => {
     try {
  
-        const { email, newPassword } = req.body;
+        const { email, newPassword, otpCode } = req.body;
 
-        if(!email || !newPassword) return res.status(400).json({ success: false, message: 'INVALID_BODY' });
+        if(!email || !newPassword || !otpCode) return res.status(400).json({ success: false, message: 'INVALID_BODY' });
+
+        const emailVerified = await otpVerify(email, otpCode);
+
+        if(!emailVerified) return res.status(409).json({ success: false, message: 'VERIFICATION_FAILED' });
 
         const user = await User.findOne({ email });
 
@@ -473,11 +386,7 @@ const authUser = async(req, res) => {
         
         const fetchedUser = await User.findById(userId).populate("userAvatar");
 
-        if(!fetchedUser) {
-            res.clearCookie(process.env.SESSION_NAME);
-            res.clearCookie(process.env.DEVICE_NAME);
-            return res.status(404).json({ success: false, message: "USER_NOT_FOUND" });
-        };
+        if(!fetchedUser) return res.status(404).json({ success: false, message: "USER_NOT_FOUND" });
         
         const userAvatar = fetchedUser.userAvatar;
 
@@ -507,8 +416,6 @@ module.exports = {
     login,
     resetPassword,
     logout,
-    // sessions,
-    // revokeSession,
     authUser,
     googleLogin,
     googleOneTap

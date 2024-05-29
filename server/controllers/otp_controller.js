@@ -39,6 +39,13 @@ const sendOtp = async(req, res) => {
     }
 }
 
+const otpVerify = async(email, otpCode) => {
+
+    const lastOtp = await Otp.find({ email }).sort({ createdAt: -1 }).limit(1);
+
+    return (lastOtp.length === 0 || lastOtp[0].otpCode !== otpCode) ? false : true;
+}
+
 const verifyOtp = async(req, res) => {
     try {
 
@@ -46,10 +53,9 @@ const verifyOtp = async(req, res) => {
 
         if(!email || !otpCode) return res.status(400).json({ success: false, message: 'INVALID_BODY' });
 
-        // getting the last otp code with the provided email
-        const lastOtp = await Otp.find({ email }).sort({createdAt: -1}).limit(1);
+        const validOtp = await otpVerify(email, otpCode);
 
-        if(lastOtp.length === 0 || lastOtp[0].otpCode !== otpCode) return res.status(401).json({ success: false, message: "VERIFICATION_FAILED"});
+        if(!validOtp) return res.status(401).json({ success: false, message: "VERIFICATION_FAILED"});
 
         res.status(200).json({ success: true, message: 'VERIFIED' });
 
@@ -60,5 +66,6 @@ const verifyOtp = async(req, res) => {
 
 module.exports = {
     sendOtp,
-    verifyOtp
+    verifyOtp,
+    otpVerify
 }
