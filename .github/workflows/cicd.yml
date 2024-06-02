@@ -8,7 +8,6 @@ on:
 jobs:
   build_server:
     runs-on: ubuntu-latest
-    if: ${{ startsWith(github.event_path, 'server/') }} 
     steps:
       - name: Debug Event Path
         run: echo ${{ github.event_path }}
@@ -24,7 +23,6 @@ jobs:
   deploy_server:
     needs: build_server
     runs-on: self-hosted 
-    if: ${{ startsWith(github.event_path, 'server/') }} 
     steps:
       - name: Pull Image from Docker Hub
         run: docker pull debashish22/authentique:latest || true
