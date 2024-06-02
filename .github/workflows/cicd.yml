@@ -8,7 +8,7 @@ on:
 jobs:
   build_server:
     runs-on: ubuntu-latest
-    if: github.event_path contains 'server/' 
+    if: ${{ startsWith(github.event_path, 'server/') }} 
     steps:
       - name: Checkout Source
         uses: actions/checkout@v4
@@ -22,7 +22,7 @@ jobs:
   deploy_server:
     needs: build_server
     runs-on: self-hosted 
-    if: github.event_path contains 'server/' 
+    if: ${{ startsWith(github.event_path, 'server/') }} 
     steps:
       - name: Pull Image from Docker Hub
         run: docker pull debashish22/authentique:latest || true
