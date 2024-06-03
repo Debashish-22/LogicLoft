@@ -9,7 +9,7 @@ const profileRoutes = require("./profile_routes");
 
 const avatarRoutes = require("./avatar_routes");
 
-router.get("/", (req, res) => res.status(200).json({ success: true, messge: "API, all system opertional"}));
+router.get("/", (req, res) => res.status(200).json({ success: true, messge: "API, all system opertional."}));
 
 router.use("/otp", otpRoutes);
 
