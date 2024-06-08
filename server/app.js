@@ -4,7 +4,7 @@ const PORT = process.env.PORT || 443;
 
 const express = require("express");
 const cors = require('cors');
-const https = require('https');
+// const https = require('https');
 
 const db = require("./config/connection");
 
@@ -43,11 +43,11 @@ db.on('error', () => {
     });
 });
 
-const server = https.createServer({}, app);
+// const server = https.createServer({}, app);
 
 db.once('open', () => {
 
     console.log("Successfully connected to Database");
 
-    server.listen(PORT, () => console.log(`Server running on Port: ${PORT}`));
+    app.listen(PORT, () => console.log(`Server running on Port: ${PORT}`));
 });
