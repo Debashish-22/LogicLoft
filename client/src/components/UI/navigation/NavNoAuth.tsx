@@ -31,7 +31,7 @@ const NavNoAuth = () => {
     return (
         <React.Fragment>
             <button ref={loginRef} aria-label="Log In">
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-sky-300 dark:hover:text-sky-300 transition-colors">Log In</span>
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-300 dark:hover:text-blue-300 transition-colors">Log In</span>
             </button>
             <button 
                 ref={signUpRef}

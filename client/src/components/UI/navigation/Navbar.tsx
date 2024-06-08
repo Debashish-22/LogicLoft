@@ -36,7 +36,7 @@ export const Navbar = () => {
                                 </linearGradient>
                             </defs>
                         </svg>
-                        <h2 className="text-xl font-medium text-slate-900 dark:text-white">Authentique</h2>
+                        <h2 className="text-xl font-medium text-slate-900 dark:text-white">LogicLoft</h2>
                     </Link>
                     <div className="flex items-center gap-4 md:gap-6">
                         <ThemeSwitch />

@@ -68,7 +68,7 @@ export const Sidebar = ({ closeSidebar }: Sidebar) => {
                                     <linearGradient id="c" x1="24.015" x2="24.015" y1="15.336" y2="49.904" gradientUnits="userSpaceOnUse"><stop stopColor="#3b82f6" stopOpacity=".5"/><stop offset="1" stopColor="#3b82f6" stopOpacity="0.5"/></linearGradient>
                                 </defs>
                             </svg>
-                            <h2 className="text-lg font-medium text-slate-900 dark:text-white">Authentique</h2>
+                            <h2 className="text-lg font-medium text-slate-900 dark:text-white">LogicLoft</h2>
                         </Link>
 
                         <button ref={closeBtnRef}>

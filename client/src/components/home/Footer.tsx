@@ -8,6 +8,7 @@ const Footer = () => {
             <Link
                 href="https://github.com/Debashish-22"
                 target="_blank"
+                aria-label="Developer"
                 className="mt-4 gap-4 flex justify-between items-center rounded-xl"
             >
                 <Image

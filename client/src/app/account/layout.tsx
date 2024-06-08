@@ -5,8 +5,8 @@ import { Metadata } from "next";
 import AccountNavbar from "@/components/account/AccountNavbar";
 
 export const metadata: Metadata = {
-    title: 'Authentique | My Account',
-    description: 'Manage your profile on Authentique’s ‘My Account’ page. View and edit your profile details, update your avatar, and manage your devices with ease. Perform sensitive operations like account deletion with our user-friendly interface. Take control of your account settings with Authentique.',
+    title: 'LogicLoft | My Account',
+    description: "Manage your profile on LogicLoft 'My Account' page. View and edit your profile details, update your avatar, and manage your devices with ease. Perform sensitive operations like account deletion with our user-friendly interface. Take control of your account settings with LogicLoft.",
 }
 
 const Layout = ({ children}: {children: React.ReactNode}) => {

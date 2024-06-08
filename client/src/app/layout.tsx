@@ -15,8 +15,8 @@ import NoInternet from '@/components/UI/notifications/NoInternet';
 import Script from 'next/script';
 
 export const metadata: Metadata = {
-  title: 'Authentique',
-  description: 'Experience seamless and secure user management with Authentique. Our robust platform offers advanced features such as authentication, authorization, email OTP verification, and Google OAuth with OneTap. Enjoy the flexibility of switching between dark and light modes for your comfort. Stay updated with our catchy notifications, personalize your profile avatar, and manage your devices effortlessly. Join us at Authentique, where security meets convenience.',
+  title: 'LogicLoft',
+  description: 'Experience seamless and secure user management with LogicLoft. Our robust platform offers advanced features such as authentication, authorization, email OTP verification, and Google OAuth with OneTap. Enjoy the flexibility of switching between dark and light modes for your comfort. Stay updated with our catchy notifications, personalize your profile avatar, and manage your devices effortlessly. Join us at LogicLoft, where security meets convenience.',
 }
 
 export default function RootLayout({ children}: {children: React.ReactNode}){
