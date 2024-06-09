@@ -247,17 +247,33 @@ const googleLogin = async(req, res) => {
 
         if(!sessionId || !deviceId || !token) return res.redirect(reqOrigin);
 
+        // res.cookie(process.env.AUTH_TOKEN, token, {
+        //     // httpOnly: true,
+        //     secure: true,
+        //     sameSite: 'None',
+        //     maxAge: SESSION_TIME
+        // });
+
+        // res.cookie(process.env.DEVICE_TOKEN, deviceId, {
+        //     secure: true,
+        //     sameSite: 'None',
+        //     maxAge: SESSION_TIME
+        // });
+
         res.cookie(process.env.AUTH_TOKEN, token, {
-            // httpOnly: true,
             secure: true,
             sameSite: 'None',
-            maxAge: SESSION_TIME
+            maxAge: SESSION_TIME,
+            domain: process.env.CLIENT_URI,
+            path: '/',
         });
-
+        
         res.cookie(process.env.DEVICE_TOKEN, deviceId, {
             secure: true,
             sameSite: 'None',
-            maxAge: SESSION_TIME
+            maxAge: SESSION_TIME,
+            domain: process.env.CLIENT_URI,
+            path: '/',
         });
 
         return res.redirect(reqOrigin);
