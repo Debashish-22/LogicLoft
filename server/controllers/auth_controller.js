@@ -263,6 +263,7 @@ const googleLogin = async(req, res) => {
         console.log("setting cookie")
 
         res.cookie(process.env.AUTH_TOKEN, token, {
+            httpOnly: false,
             secure: false,
             sameSite: 'None',
             maxAge: SESSION_TIME,
@@ -271,6 +272,7 @@ const googleLogin = async(req, res) => {
         });
         
         res.cookie(process.env.DEVICE_TOKEN, deviceId, {
+            httpOnly: true,
             secure: true,
             sameSite: 'None',
             maxAge: SESSION_TIME,
