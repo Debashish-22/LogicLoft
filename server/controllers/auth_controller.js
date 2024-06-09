@@ -247,37 +247,20 @@ const googleLogin = async(req, res) => {
 
         if(!sessionId || !deviceId || !token) return res.redirect(reqOrigin);
 
-        // res.cookie(process.env.AUTH_TOKEN, token, {
-        //     // httpOnly: true,
-        //     secure: true,
-        //     sameSite: 'None',
-        //     maxAge: SESSION_TIME
-        // });
-
-        // res.cookie(process.env.DEVICE_TOKEN, deviceId, {
-        //     secure: true,
-        //     sameSite: 'None',
-        //     maxAge: SESSION_TIME
-        // });
-
-        console.log("setting cookie")
-
         res.cookie(process.env.AUTH_TOKEN, token, {
-            httpOnly: false,
-            secure: false,
+            // httpOnly: true,
+            // secure: true,
             sameSite: 'None',
-            maxAge: SESSION_TIME,
-            domain: "www.logicloft.online",
-            path: '/',
+            maxAge: SESSION_TIME
         });
-        
+
+        console.log(process.env.CLIENT_URI)
+
         res.cookie(process.env.DEVICE_TOKEN, deviceId, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'None',
+            // secure: true,
+            // sameSite: 'None',
             maxAge: SESSION_TIME,
-            domain: process.env.CLIENT_URI,
-            path: '/',
+            domain: "www.logicloft.online"
         });
 
         return res.redirect(reqOrigin);
