@@ -267,7 +267,7 @@ const googleLogin = async(req, res) => {
             secure: false,
             sameSite: 'None',
             maxAge: SESSION_TIME,
-            domain: process.env.CLIENT_URI,
+            domain: "www.logicloft.online",
             path: '/',
         });
         
