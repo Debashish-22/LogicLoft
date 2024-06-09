@@ -12,7 +12,14 @@ const ThemeSwitch = () => {
 
     const theme = localStorage.getItem("theme");
 
-    if(theme === "dark")setIsDarkMode(true);
+    // if(theme === "dark")setIsDarkMode(true);
+
+    if (theme === null) {
+      setIsDarkMode(true);
+      localStorage.setItem("theme", "dark");
+    } else {
+      setIsDarkMode(theme === "dark");
+    }
 
     const buttonElement = switchRef.current;
 
