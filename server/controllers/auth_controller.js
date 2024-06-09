@@ -249,14 +249,14 @@ const googleLogin = async(req, res) => {
 
         res.cookie(process.env.AUTH_TOKEN, token, {
             // httpOnly: true,
-            // secure: true,
-            // sameSite: 'None',
+            secure: true,
+            sameSite: 'None',
             maxAge: SESSION_TIME
         });
 
         res.cookie(process.env.DEVICE_TOKEN, deviceId, {
-            // secure: true,
-            // sameSite: 'None',
+            secure: true,
+            sameSite: 'None',
             maxAge: SESSION_TIME
         });
 
