@@ -248,11 +248,13 @@ const googleLogin = async(req, res) => {
         if(!sessionId || !deviceId || !token) return res.redirect(reqOrigin);
 
         res.cookie(process.env.AUTH_TOKEN, token, {
-            maxAge: SESSION_TIME
+            maxAge: SESSION_TIME,
+            domain: 'www.logicloft.online'
         });
 
         res.cookie(process.env.DEVICE_TOKEN, deviceId, {
             maxAge: SESSION_TIME,
+            domain: 'www.logicloft.online'
         });
 
         return res.redirect(reqOrigin);
