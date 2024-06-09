@@ -260,8 +260,10 @@ const googleLogin = async(req, res) => {
         //     maxAge: SESSION_TIME
         // });
 
+        console.log("setting cookie")
+
         res.cookie(process.env.AUTH_TOKEN, token, {
-            secure: true,
+            secure: false,
             sameSite: 'None',
             maxAge: SESSION_TIME,
             domain: process.env.CLIENT_URI,
