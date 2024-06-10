@@ -26,8 +26,11 @@ async function middleware(req: NextRequest) {
         const res =  NextResponse.redirect(absoluteURL.toString());
 
         res.cookies.set(process.env.AUTH_TOKEN || 'APTKN', '', { maxAge: 0 });
+        res.cookies.set(process.env.AUTH_TOKEN || 'APTKN', '', { maxAge: 0, domain: process.env.APP_DOMAIN });
+
         res.cookies.set(process.env.DEVICE_TOKEN || 'APDID', '', { maxAge: 0 });
-          
+        res.cookies.set(process.env.DEVICE_TOKEN || 'APDID', '', { maxAge: 0, domain: process.env.APP_DOMAIN });
+
         return res;
       }
 

@@ -157,7 +157,10 @@ const AuthProvider = ({ children }: AuthProvider) => {
         setUser(prevUser => ({...prevUser, ...newState}));
 
         document.cookie = serialize(process.env.AUTH_TOKEN!, "", { maxAge: 0 });
+        document.cookie = serialize(process.env.AUTH_TOKEN!, "", { maxAge: 0, domain: process.env.APP_DOMAIN });
+
         document.cookie = serialize(process.env.DEVICE_TOKEN!, "", { maxAge: 0 });
+        document.cookie = serialize(process.env.DEVICE_TOKEN!, "", { maxAge: 0, domain: process.env.APP_DOMAIN });
     }
 
     const logout = async() => {
@@ -173,7 +176,10 @@ const AuthProvider = ({ children }: AuthProvider) => {
             if(success){
             
                 document.cookie = serialize(process.env.AUTH_TOKEN!, "", { maxAge: 0 });
+                document.cookie = serialize(process.env.AUTH_TOKEN!, "", { maxAge: 0, domain: process.env.APP_DOMAIN });
+
                 document.cookie = serialize(process.env.DEVICE_TOKEN!, "", { maxAge: 0 });
+                document.cookie = serialize(process.env.DEVICE_TOKEN!, "", { maxAge: 0, domain: process.env.APP_DOMAIN });
 
                 router.push("/");
 
