@@ -40,6 +40,9 @@ export const Navbar = () => {
                     </Link>
                     <div className="flex items-center gap-4 md:gap-6">
                         <ThemeSwitch />
+                        <Link href="/pricing">
+                            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-300 dark:hover:text-blue-300 transition-colors">Pricing</span>
+                        </Link>
                         {isAuthentic ? <NavAuth /> : <NavNoAuth />}
                     </div>
                 </div>
