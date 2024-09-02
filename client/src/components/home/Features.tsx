@@ -91,6 +91,15 @@ const Features = (() => {
                         <h3 className="mb-2 text-xl font-medium text-slate-600 dark:text-slate-300">Centralized Access Control</h3>
                         <p className="text-slate-600 dark:text-slate-400">Reserved for original users only, our system ensures exclusive access to sensitive account operations like account deletion, safeguarding against unauthorized actions and protecting user data integrity.</p>
                     </div>
+                    <div>
+                        <div className="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-blue-100 lg:h-12 lg:w-12 dark:bg-blue-900">
+                            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path className="stroke-2 stroke-blue-600 dark:stroke-blue-300" strokeLinecap="round" strokeLinejoin="round" d="M6 4H10.5M10.5 4C12.9853 4 15 6.01472 15 8.5C15 10.9853 12.9853 13 10.5 13H6L13 20M10.5 4H18M6 8.5H18"/>
+                            </svg>
+                        </div>
+                        <h3 className="mb-2 text-xl font-medium text-slate-600 dark:text-slate-300">Easy Subscription Management</h3>
+                        <p className="text-slate-600 dark:text-slate-400">Manage your subscriptions effortlessly with our app. Renew plans, upgrade features, and track your usage all in one place. Enjoy seamless control and customization for a better experience.</p>
+                    </div>
                 </div>
             </div>
         </section>
