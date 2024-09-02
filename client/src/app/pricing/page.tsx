@@ -154,7 +154,7 @@ const Pricing = () => {
 
         } catch (error) {
 
-          
+            console.log(error)
             toast.renderToast("Something went wrong", ToastType.Error);
         }
     }
