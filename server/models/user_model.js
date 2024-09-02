@@ -58,34 +58,20 @@ const userSchema = new mongoose.Schema({
         trim: true,
         default: null
     },
-    accountType: {
-        type: String,
-        enum: ["BASIC", "PRO", "PREMIUM"],
-        default: "BASIC"
+    subscription: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Subscription",
+        default: null
     },
     activeStatus: {
         type: Boolean,
         default: true
     },
-    screenLimit: {
-        type: Number,
-        default: 3
-    },
-    lastSession:{
-        login:{
-            type: Date,
-            default: null
-        },
-        platform:{
-            type: String,
-            default: null
-        }
-    },
     createdAt: {
         type: Date,
         default: Date.now
     }
-})
+}, { timestamps: true })
 
 const User = mongoose.model("User", userSchema);
 

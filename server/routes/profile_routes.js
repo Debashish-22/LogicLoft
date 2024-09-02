@@ -15,6 +15,10 @@ router.post("/revoke-device", isAuthentic, profileControlller.revokeDevice);
 
 router.delete("/delete-account", isAuthentic, profileControlller.deleteAccount);
 
+router.get("/subscription", isAuthentic, profileControlller.currentSubscription);
+
+router.get("/payments", isAuthentic, profileControlller.payments);
+
 router.use("*", (req, res) => {
 
     return res.status(404).json({

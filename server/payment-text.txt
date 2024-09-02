@@ -1,0 +1,249 @@
+#USERS
+
+{
+  "_id": "ObjectId",
+  "name": "string",
+  "email": "string",
+  "passwordHash": "string",
+  "roles": ["string"], // e.g., ["user", "admin"]
+  "subscriptions": [
+    {
+      "subscriptionId": "ObjectId",
+      "startDate": "ISODate",
+      "endDate": "ISODate",
+      "status": "string" // e.g., "active", "canceled", "paused"
+    }
+  ],
+  "paymentMethods": [
+    {
+      "methodId": "string", // e.g., payment method token
+      "type": "string", // e.g., "card", "upi"
+      "lastFourDigits": "string",
+      "expiryDate": "ISODate"
+    }
+  ],
+  "createdAt": "ISODate",
+  "updatedAt": "ISODate"
+}
+
+#SUBSCRIPTIONS
+
+{
+  "_id": "ObjectId",
+  "userId": "ObjectId", // Reference to Users collection
+  "planId": "ObjectId", // Reference to Plans collection
+  "startDate": "ISODate",
+  "endDate": "ISODate",
+  "status": "string", // e.g., "active", "canceled", "paused"
+  "amount": "number", // Subscription amount
+  "currency": "string", // e.g., "USD", "INR"
+  "nextBillingDate": "ISODate",
+  "createdAt": "ISODate",
+  "updatedAt": "ISODate"
+}
+
+
+#PLANS
+
+{
+  "_id": "ObjectId",
+  "name": "string",
+  "description": "string",
+  "amount": "number", // Price of the plan
+  "currency": "string", // e.g., "USD", "INR"
+  "interval": "string", // e.g., "monthly", "yearly"
+  "features": ["string"], // List of features included in the plan
+  "createdAt": "ISODate",
+  "updatedAt": "ISODate"
+}
+
+#PAYMENTS
+
+{
+  "_id": "ObjectId",
+  "userId": "ObjectId", // Reference to Users collection
+  "subscriptionId": "ObjectId", // Reference to Subscriptions collection
+  "amount": "number",
+  "currency": "string", // e.g., "USD", "INR"
+  "status": "string", // e.g., "success", "failed", "pending"
+  "paymentMethod": {
+    "methodId": "string", // Payment method token or ID
+    "type": "string" // e.g., "card", "upi"
+  },
+  "transactionId": "string", // ID from the payment gateway
+  "timestamp": "ISODate",
+  "createdAt": "ISODate",
+  "updatedAt": "ISODate"
+}
+
+#INVOICES
+
+{
+  "_id": "ObjectId",
+  "userId": "ObjectId", // Reference to Users collection
+  "subscriptionId": "ObjectId", // Reference to Subscriptions collection
+  "amount": "number",
+  "currency": "string", // e.g., "USD", "INR"
+  "invoiceDate": "ISODate",
+  "dueDate": "ISODate",
+  "status": "string", // e.g., "paid", "unpaid", "overdue"
+  "items": [
+    {
+      "description": "string",
+      "amount": "number"
+    }
+  ],
+  "createdAt": "ISODate",
+  "updatedAt": "ISODate"
+}
+
+#NOTIFICATIONS
+
+{
+  "_id": "ObjectId",
+  "userId": "ObjectId", // Reference to Users collection
+  "type": "string", // e.g., "email", "sms"
+  "content": "string",
+  "status": "string", // e.g., "sent", "pending", "failed"
+  "timestamp": "ISODate",
+  "createdAt": "ISODate",
+  "updatedAt": "ISODate"
+}
+
+const session = client.startSession();
+
+try {
+  session.startTransaction();
+
+  // Create Subscription
+  const subscriptionResult = await db.subscriptions.insertOne({
+    userId: ObjectId("607d2f2f5e8e4f4c5d78e9c2"),
+    planId: ObjectId("607d2f2f5e8e4f4c5d78e9c3"),
+    startDate: new Date(),
+    endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+    status: "active",
+    amount: 29.99,
+    currency: "USD",
+    nextBillingDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }, { session });
+
+  const subscriptionId = subscriptionResult.insertedId;
+
+  // Create Payment
+  await db.payments.insertOne({
+    userId: ObjectId("607d2f2f5e8e4f4c5d78e9c2"),
+    subscriptionId: subscriptionId,
+    amount: 29.99,
+    currency: "USD",
+    status: "success",
+    paymentMethod: {
+      methodId: "pm_1I9N2M2eZvKYlo2C0kZ27L1N",
+      type: "card"
+    },
+    transactionId: "ch_1I9N2M2eZvKYlo2C0kZ27L1N",
+    timestamp: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }, { session });
+
+  await session.commitTransaction();
+} catch (error) {
+  await session.abortTransaction();
+  throw error;
+} finally {
+  session.endSession();
+}
+
+
+{
+  id: 'pay_OgpZliHntUVMzf',
+  entity: 'payment',
+  amount: 2999,
+  currency: 'INR',
+  status: 'captured',
+  order_id: 'order_OgpZQIM237I6MI', 
+  invoice_id: null,
+  international: false,
+  method: 'card',
+  amount_refunded: 0,
+  refund_status: null,
+  captured: true,
+  description: 'Test Payment',      
+  card_id: 'card_OgpZluKMOeYJXH',   
+  card: {
+    id: 'card_OgpZluKMOeYJXH',      
+    entity: 'card',
+    name: '',
+    last4: '1111',
+    network: 'Visa',
+    type: 'prepaid',
+    issuer: null,
+    international: false,
+    emi: false,
+    sub_type: 'consumer',
+    token_iin: null
+  },
+  bank: null,
+  wallet: null,
+  vpa: null,
+  email: 'deb@gmail.com',
+  contact: '+918457884872',
+  token_id: 'token_OgpZmdBO33fTYx', 
+  notes: [],
+  fee: 60,
+  tax: 0,
+  error_code: null,
+  error_description: null,
+  error_source: null,
+  error_step: null,
+  error_reason: null,
+  acquirer_data: { auth_code: '352621' },
+  created_at: 1722776396
+}
+
+{
+  id: 'pay_Ok4SSQHM1xYhQo',
+  entity: 'payment',
+  amount: 2999, // by 100
+  currency: 'INR',
+  status: 'captured', // money deducted if authorized means have sufficient blance but on hold
+  order_id: 'order_Ok4RbiZUCbwbLq', 
+  invoice_id: null,
+  international: false,
+  method: 'card',
+  amount_refunded: 0,
+  refund_status: null,
+  captured: true,
+  description: 'Test Payment',      
+  card_id: 'card_Ok4SSjZJ0flHVp',   
+  card: {
+    id: 'card_Ok4SSjZJ0flHVp',      
+    entity: 'card',
+    name: '',
+    last4: '1111',
+    network: 'Visa',
+    type: 'prepaid',
+    issuer: null,
+    international: false,
+    emi: false,
+    sub_type: 'consumer',
+    token_iin: null
+  },
+  bank: null,
+  wallet: null,
+  vpa: null,
+  email: 'deb@gmail.com',
+  contact: '+918457884872',
+  notes: [],
+  fee: 60,
+  tax: 0,
+  error_code: null,
+  error_description: null,
+  error_source: null,
+  error_step: null,
+  error_reason: null,
+  acquirer_data: { auth_code: '387326' },
+  created_at: 1723483825
+} card

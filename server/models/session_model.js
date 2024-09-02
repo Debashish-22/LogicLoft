@@ -24,9 +24,12 @@ const sessionSchema = new mongoose.Schema({
     },
     expireAt:{
         type: Date,
+        default: function() {
+          return new Date(Date.now() + 24 * 60 * 60 * 1000); // 1 day from now
+        },
         expires: "1d"
     }
-})
+}, { timestamps: true })
 
 const Session = mongoose.model("Session", sessionSchema);
 

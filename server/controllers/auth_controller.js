@@ -18,6 +18,8 @@ const oAuth2Client = new OAuth2Client(
     process.env.GOOGLE_OAUTH_REDIRECT, 
 );
 
+const defaultScreenLimit = 3;
+
 const { saltRounds, emailRegex, usernameMinLen, pwdMinLen } = require("../config/validation");
 
 const SESSION_TIME = 24 * 60 * 60 * 1000;
@@ -133,15 +135,6 @@ const initiateSession = async({ userId, screenLimit, platform }) => {
 
         if(!session) return null;
 
-        const updateUser = await User.findByIdAndUpdate(userId,{
-            $set:{
-                "lastSession.login": session.login,
-                "lastSession.platform": JSON.stringify(session.platform)
-            }
-        });
-
-        if(!updateUser) return null;
-
         const encryptedSessionId = CryptoJS.AES.encrypt(session.id, process.env.SESSION_SECRET_KEY).toString();
 
         const token = jwt.sign({ APSID: encryptedSessionId }, process.env.JWT_SECRET_KEY, { expiresIn: SESSION_TIME });
@@ -162,19 +155,28 @@ const login = async(req, res) => {
             return res.status(400).json({ success: false, message: 'INVALID_BODY' });
         }
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email }).populate({
+            path: "subscription",
+            populate: {
+                path: "plan"
+            }
+        });
 
         if(!user) return res.status(409).json({ success: false, message: "INVALID_CREDENTIALS" });
+
+        const { id, activeStatus, subscription } = user;
         
-        if(!user.activeStatus) return res.status(409).json({ success: false, message: "INACTIVE" });
+        if(!activeStatus) return res.status(409).json({ success: false, message: "INACTIVE" });
         
         const match = await bcrypt.compare(password, user.password);
 
         if(!match) return res.status(409).json({ success: false, message: "INVALID_CREDENTIALS" });
-        
+
+        const screenLimit = subscription?.plan?.features?.screenLimit || defaultScreenLimit;
+
         const { sessionId, deviceId, token } = await initiateSession({
-            userId: user.id,
-            screenLimit: user.screenLimit,
+            userId: id,
+            screenLimit,
             platform
         });
 
@@ -183,6 +185,8 @@ const login = async(req, res) => {
         return res.status(200).json({ success: true, message: 'USER_LOGGED_IN', data: { token, deviceId }});
 
     } catch (error) {
+
+        console.log(error)
         return res.status(500).json({ success: false, message: error.message });
     }
 }
@@ -213,10 +217,15 @@ const googleLogin = async(req, res) => {
 
         if(!email_verified) return res.redirect(reqOrigin);
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email }).populate({
+            path: "subscription",
+            populate: {
+                path: "plan"
+            }
+        });
 
         let userId;
-        let screenLimit;
+        let screenLimit = defaultScreenLimit;
 
         if(!user){
 
@@ -229,14 +238,13 @@ const googleLogin = async(req, res) => {
             if(!newUser) return res.redirect(reqOrigin);
 
             userId = newUser.id;
-            screenLimit = newUser.screenLimit;
 
         } else {
 
             if(!user.activeStatus) return res.redirect(reqOrigin);
 
             userId = user.id;
-            screenLimit = user.screenLimit;
+            screenLimit = user?.subscription?.plan?.features?.screenLimit || defaultScreenLimit;
         }
 
         const { sessionId, deviceId, token } = await initiateSession({
@@ -260,6 +268,7 @@ const googleLogin = async(req, res) => {
         return res.redirect(reqOrigin);
         
     } catch (error) {
+
         return res.redirect(process.env.CLIENT_URI);
     }
 }
@@ -279,10 +288,15 @@ const googleOneTap = async(req, res) => {
 
         if(!email_verified) return res.status(409).json({ success: false, message: "EMAIL_UN_VERIFIED" });
 
-        const user = await User.findOne({email});
+        const user = await User.findOne({ email }).populate({
+            path: "subscription",
+            populate: {
+                path: "plan"
+            }
+        });
 
         let userId;
-        let screenLimit;
+        let screenLimit = defaultScreenLimit;
         
         if(!user){
 
@@ -295,14 +309,13 @@ const googleOneTap = async(req, res) => {
             if(!newUser) return res.status(500).json({ success: false, message: "SOMETHING_WENT_WRONG" });
 
             userId = newUser.id;
-            screenLimit = newUser.screenLimit;
 
         } else {
 
             if(!user.activeStatus) return res.status(500).json({ success: false, message: "SOMETHING_WENT_WRONG" });
 
             userId = user.id;
-            screenLimit = user.screenLimit;
+            screenLimit = user?.subscription?.plan?.features?.screenLimit || defaultScreenLimit;
         }
 
         const { sessionId, deviceId, token } = await initiateSession({
@@ -381,23 +394,36 @@ const authUser = async(req, res) => {
 
         if(!userId) return res.status(400).json({ success: false, message: "CREDENTIALS_MISSING" });
         
-        const fetchedUser = await User.findById(userId).populate("userAvatar");
+        // const fetchedUser = await User.findById(userId).populate("userAvatar");
+        const fetchedUser = await User.findById(userId).populate({
+            path: "subscription",
+            populate: {
+                path: "plan"
+            }
+        }).populate("userAvatar");
 
         if(!fetchedUser) return res.status(404).json({ success: false, message: "USER_NOT_FOUND" });
         
         const userAvatar = fetchedUser.userAvatar;
 
-        const { username, email, accountType, designation, city, state, country } = fetchedUser;
+        const screenLimit = fetchedUser?.subscription?.plan?.features?.screenLimit ?? defaultScreenLimit;
+
+        const accountType = fetchedUser?.subscription?.plan?.planType ?? "FREE";
+
+        const { username, email, gender, designation, city, state, country, zip } = fetchedUser;
 
         const user = {
             username,
             email,
-            userAvatar,
-            accountType,
+            gender,
             designation, 
-            city,
+            city, 
             state, 
-            country
+            country, 
+            zip, 
+            userAvatar,
+            screenLimit,
+            accountType
         }        
 
         res.status(200).json({ success: true, message: 'FETCHED', user });

@@ -1,6 +1,8 @@
 const User = require("../models/user_model");
 const Avatar = require("../models/avatar_model");
 const Session = require("../models/session_model");
+const Subscription = require("../models/subscription_model");
+const Payment = require("../models/payment_model");
 
 const { usernameMinLen } = require("../config/validation");
 
@@ -145,10 +147,49 @@ const deleteAccount = async(req, res) => {
     }
 }
 
+const currentSubscription = async(req, res) => {
+    try {
+
+        const { userId } = req;
+
+        if(!userId) return res.status(400).json({ success: false, message: "CREDENTIALS_MISSING" });
+
+        const subscriptionDetails = await Subscription.findOne({ user: userId}).populate("plan");
+
+        return res.status(200).json({ success: true, message: 'FETCHED', subscription: subscriptionDetails });
+        
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+const payments = async(req, res) => {
+    try {
+
+        const { userId } = req;
+
+        if(!userId) return res.status(400).json({ success: false, message: "CREDENTIALS_MISSING" });
+
+        const payments = await Payment.find({ user: userId}).populate({
+            path: "subscription",
+            populate: {
+                path: "plan"
+            }
+        });
+
+        return res.status(200).json({ success: true, message: 'FETCHED', payments });
+
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
+
 module.exports = {
     updateAvatar,
     updateProfile,
     devices,
     revokeDevice,
-    deleteAccount
+    deleteAccount,
+    currentSubscription,
+    payments
 }
