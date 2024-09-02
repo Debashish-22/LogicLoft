@@ -2,6 +2,7 @@ require('dotenv').config();
 
 module.exports = {
     env: {
+        APP_NAME: process.env.APP_NAME,
         APP_DOMAIN: process.env.APP_DOMAIN,
         SERVER_API: process.env.SERVER_API,
         AUTH_TOKEN: process.env.AUTH_TOKEN,
@@ -9,6 +10,7 @@ module.exports = {
         GOOGLE_ROOT_URI: process.env.GOOGLE_ROOT_URI,
         GOOGLE_OAUTH_REDIRECT: process.env.GOOGLE_OAUTH_REDIRECT,
         GOOGLE_OAUTH_CLIENT_ID: process.env.GOOGLE_OAUTH_CLIENT_ID,
+        RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
     },
     reactStrictMode: false,
 }

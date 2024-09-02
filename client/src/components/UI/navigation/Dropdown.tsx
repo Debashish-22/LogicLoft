@@ -80,6 +80,16 @@ const Dropdown: React.FC<DropdownProps> = ({ closeDropdown }) => {
           </Link>
         </li>
         <li>
+          <Link
+            onClick={closeDropdown}
+            prefetch={false}
+            href="/account/subscription"
+            className="inline-block w-full text-sm font-medium text-slate-600 hover:text-slate-800 dark:text-slate-400 hover:dark:text-slate-200 transition-colors"
+          >
+            My Subscriptions
+          </Link>
+        </li>
+        <li>
           <button
             ref={logOutBtnRef}
             className="w-full text-left text-sm font-medium text-slate-600 hover:text-slate-800 dark:text-slate-400 hover:dark:text-slate-200 transition-colors"

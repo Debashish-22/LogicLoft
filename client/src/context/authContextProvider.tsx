@@ -26,7 +26,7 @@ interface User {
         designation?: string, 
         city?: string,
         state?: string, 
-        country?: string
+        country?: string,
     }
     authenticated: boolean
 }

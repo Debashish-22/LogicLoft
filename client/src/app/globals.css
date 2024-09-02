@@ -8,6 +8,10 @@
   }
 }
 
+body {
+  font-family: inter, Arial, sans-serif;
+}
+
 .testing{
   border: 2px solid white;
 }
