@@ -214,7 +214,7 @@ const Subscription = () => {
                             </div>
                             :
                             <div className="h-20 flex justify-center items-center">
-                                <span className="text-xs text-yellow-700 dark:text-yellow-500">You haven't made any payments yet.</span>
+                                <span className="text-xs text-yellow-700 dark:text-yellow-500">You haven&apos;t made any payments yet.</span>
                             </div>
                         }
                     </>

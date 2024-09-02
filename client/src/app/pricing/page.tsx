@@ -28,16 +28,13 @@ const Pricing = () => {
 
     const auth = useAuth();
 
-    if (!auth) return null;
-
-    const isAuthentic = auth.authenticated;
-
-    const { username, email, accountType } = auth.user;    
-
     const modal = useModal();
     const toast = useToast();
     const toastRef = useRef(toast);
     const router = useRouter();
+
+    const isAuthentic = auth.authenticated;
+    const { username, email, accountType } = auth.user;    
 
     const [pageLoading, setPageLoading] = useState(true);
     const [plans, setPlans] = useState<Plan[]>([]);
@@ -67,7 +64,7 @@ const Pricing = () => {
         }
     }
 
-    useEffect(() => { fetchPlans() }, []);
+    useEffect(() => { fetchPlans() }, [toast]);
 
     const handleAuth = (mode?: string) => modal?.renderModal(ModalType.AUTH_MODAL, mode);
 
@@ -144,7 +141,8 @@ const Pricing = () => {
                 },
             };
             
-            const paymentObject = new window.Razorpay(options);
+            // const paymentObject = new window.Razorpay(options);
+            const paymentObject = new (window as any).Razorpay(options);
 
             paymentObject.on('payment.failed', function (response: any) {
                 toast.renderToast("Something went wrong", ToastType.Error);
