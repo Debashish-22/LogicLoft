@@ -9,4 +9,6 @@ router.post("/initialise-order", isAuthentic, orderController.initialiseOrder);
 
 router.post("/verify-payment", isAuthentic, orderController.verifyPayment);
 
+router.post("/upgrade-details", isAuthentic, orderController.getPlanUpgradeDetails);
+
 module.exports = router;

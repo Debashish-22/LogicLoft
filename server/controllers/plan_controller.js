@@ -36,5 +36,5 @@ const addPlan = async(req, res) => {
 
 module.exports = {
     plans,
-    addPlan
+    addPlan,
 }

@@ -51,7 +51,6 @@ const generatedSignature = (razorpayOrderId, razorpayPaymentId) => {
 // also update user
 // in case subscription we may need to handle refund
 
-
 const initialiseOrder = async (req, res) => {
 
     try {
@@ -224,60 +223,78 @@ const verifyPayment = async(req, res) => {
     }
 }
 
-// const handlePaymentCaptured = async (payload) => {
+const daysLeftFromNow = (startDateStr, endDateStr) => {
+    // Convert ISO strings to Date objects
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(endDateStr);
 
-//     try {
+    // Calculate the difference in milliseconds
+    const diffTime = endDate - startDate;
 
-//         const { paymentId, orderId } = payload.payment.entity;
+    // Convert milliseconds to days
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
 
-//         const subscriptionId = payload.payment.entity.subscriptionId;
+    // Use Math.ceil to round up to the next whole number of days
+    return Math.ceil(diffDays);
+}
 
-//         // Fetch payment and subscription details
-//         const payment = await razorpay.payments.fetch(paymentId);
+const getPlanUpgradeDetails = async(req, res) => {
+    try {
 
-//         console.log(payment, subscriptionId)
+        const { userId } = req;
+        const newPlanId = req.body.planId;
 
-//         // const subscription = await Subscription.findOne({ razorpayOrderId: orderId });
+        if(!userId || !newPlanId) return res.status(400).json({ success: false, message: 'INVALID_BODY' });
 
-//         // if (!subscription) {
-//         //     console.error('Subscription not found for order:', orderId);
-//         //     return;
-//         // }
+        const now = new Date();
 
-//         // // Update subscription status to active
-//         // if (payment.status === 'captured') {
-//         //     subscription.status = 'ACTIVE';
-//         //     await subscription.save();
-//         // }
-//     } catch (error) {
-//         console.error('Error handling payment captured:', error);
-//     }
-// };
+        const subscriptionDetails = await Subscription.findOne({
+            user: userId,
+            status: 'ACTIVE',
+            startDate: { $lte: now },
+            endDate: { $gte: now }
+        }).sort({ createdAt: -1 }).populate("plan");
 
-// const handlePaymentFailed = async (payload) => {
-//     try {
-//         const paymentId = payload.payment.entity.id;
-//         const orderId = payload.payment.entity.order_id;
+        if(!subscriptionDetails) return res.status(400).json({ success: false, message: 'IN_ELIGIBLE' });
 
-//         // Fetch subscription and handle failure
-//         const subscription = await Subscription.findOne({ razorpayOrderId: orderId });
+        if(!subscriptionDetails.planType === "PREMIUM") return res.status(400).json({ success: false, message: 'IN_ELIGIBLE' });
 
-//         if (!subscription) {
-//             console.error('Subscription not found for order:', orderId);
-//             return;
-//         }
+        const newPlanDetails = await Plan.findById(newPlanId);
 
-//         // Update subscription status to failed or any appropriate status
-//         subscription.status = 'FAILED';
-//         await subscription.save();
+        if(!newPlanDetails) return res.status(400).json({ success: false, message: 'INVALID_PLAN' });
 
-//         // Optionally, issue a refund if required
-//     } catch (error) {
-//         console.error('Error handling payment failed:', error);
-//     }
-// };
+        const newPlanAmount = newPlanDetails.amount;
+        const currentPlanAmount = subscriptionDetails.plan.amount;
+
+        const currentPlanDurationInDays = daysLeftFromNow(subscriptionDetails.startDate, subscriptionDetails.endDate);
+
+        const currentPlanExhaustedDays = daysLeftFromNow(subscriptionDetails.startDate, now);
+
+        const currentPlanAmountPerDay = parseFloat((currentPlanAmount / currentPlanDurationInDays).toFixed(2));
+
+        const currentPlanRemainingAmount = parseFloat(currentPlanAmount - (currentPlanAmountPerDay * currentPlanExhaustedDays));
+
+        const upgradableAmount = (newPlanAmount - currentPlanRemainingAmount);
+
+        const planUpgradeDetails = {
+            newPlanId,
+            isUpgradable: true,
+            upgradeDetails: {
+                newPlanAmount,
+                currentPlanRemainingAmount,
+                upgradableAmount
+            }
+        }
+
+        return res.status(200).json({ success: true, message: 'PAYMENT_VERIFIED', planUpgradeDetails });
+        
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "INTERNAL_SERVER_ERROR" });
+    }
+}
 
 module.exports = {
     initialiseOrder,
-    verifyPayment
+    verifyPayment,
+    getPlanUpgradeDetails
 }

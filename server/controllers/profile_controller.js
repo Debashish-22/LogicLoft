@@ -154,7 +154,10 @@ const currentSubscription = async(req, res) => {
 
         if(!userId) return res.status(400).json({ success: false, message: "CREDENTIALS_MISSING" });
 
-        const subscriptionDetails = await Subscription.findOne({ user: userId}).populate("plan");
+        const subscriptionDetails = await Subscription.findOne({
+            user: userId,
+            status: { $nin: ["PROGRESS", "FAILED"] }
+        }).sort({ createdAt: -1 }).populate("plan");
 
         return res.status(200).json({ success: true, message: 'FETCHED', subscription: subscriptionDetails });
         
